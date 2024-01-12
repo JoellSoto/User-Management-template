@@ -27,7 +27,7 @@ public class GlobalExceptionsHandler {
 	    errorResponse.setMessage(ex.getMessage());
 	    errorResponse.setResource(ex.getResource());
 	    errorResponse.setErrorCode(ex.getErrorCode());
-	    errorResponse.setStatus(HttpStatus.NOT_FOUND.value());
+	    errorResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 	    errorResponse.setTimestamp(LocalDateTime.now());
 	    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 	  }	

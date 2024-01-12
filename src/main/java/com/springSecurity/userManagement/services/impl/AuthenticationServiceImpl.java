@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +16,7 @@ import com.springSecurity.userManagement.dto.SignUpRequest;
 import com.springSecurity.userManagement.entities.Role;
 import com.springSecurity.userManagement.entities.Roles;
 import com.springSecurity.userManagement.entities.User;
+import com.springSecurity.userManagement.exceptions.ResourceNotFoundException;
 import com.springSecurity.userManagement.repositories.RoleRepository;
 import com.springSecurity.userManagement.repositories.UserRepository;
 import com.springSecurity.userManagement.services.AuthenticationService;
@@ -65,7 +66,12 @@ public class AuthenticationServiceImpl implements AuthenticationService{
 	}
 	
 	public JwtAuthenticationResponse signIn(SignInRequest signInRequest) {
-		authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequest.getEmail(),signInRequest.getPassword()));
+		try {
+			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signInRequest.getEmail(),signInRequest.getPassword()));
+		} catch (Exception e) {
+			throw new ResourceNotFoundException("System Login",HttpStatus.INTERNAL_SERVER_ERROR.value(),HttpStatus.INTERNAL_SERVER_ERROR.name() , "Incorrect Username/Password!");
+		}
+		
 		var user=userRepository.findByEmail(signInRequest.getEmail()).orElseThrow(()->new IllegalArgumentException("Ivalid email or password"));
 		var acessToken= jwtService.generateToken(user);
 		var refreshToken= jwtService.generateRefreshToken(new HashMap<>(), user);
